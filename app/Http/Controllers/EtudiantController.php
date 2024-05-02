@@ -149,7 +149,7 @@ class EtudiantController extends Controller
 
             $etudiant = $query->get($id_etudiant, false);
 
-            $etudiant->delete($etudiant->getObjectId());
+            $etudiant->destroy();
 
             return response()->json([
                 'message' => 'Suppression réuissi!'

@@ -30,3 +30,6 @@ Route::get('/parse/etudiant/{IdEtudiant}', 'EtudiantController@show');
 
 // Route permettant de modifier un étudiant
 Route::put('/parse/etudiant/{IdEtudiant}', 'EtudiantController@update');
+
+// Route permettant de modifier un étudiant
+Route::delete('/parse/etudiant/{IdEtudiant}', 'EtudiantController@delete');
