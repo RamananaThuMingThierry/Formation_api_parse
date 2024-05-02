@@ -80,8 +80,16 @@ class EtudiantController extends Controller
             $prenom = $etudiant->get("prenom");
             $promotion = $etudiant->get("promotion");
             $genre = $etudiant->get("genre");
+            $objectId = $etudiant->getObjectId();
+            $updatedAt = $etudiant->getUpdatedAt();
+            $createdAt = $etudiant->getCreatedAt();
+            $acl = $etudiant->getACL();
 
             return response()->json([
+                'updatedAt' => $updatedAt,
+                'createdAt' => $createdAt,
+                'acl' => $acl,
+                'id' => $objectId,
                 'nom' => $nom,
                 'prenom' => $prenom,
                 'promotion' => $promotion,
@@ -99,24 +107,29 @@ class EtudiantController extends Controller
         }
     }
 
+    // Méthode permettant de faire une mise à jours des données d'un étudiant
     public function update(Request $request, $id_etudiant){
+ 
         $query = new ParseQuery("etudiant");
-
+        
         try {
 
             $etudiant = $query->get($id_etudiant, false);
 
-            $nom = $etudiant->get("nom");
-            $prenom = $etudiant->get("prenom");
-            $promotion = $etudiant->get("promotion");
-            $genre = $etudiant->get("genre");
+            $nom = $request->nom;
+            $prenom = $request->prenom;
+            $promotion = $request->promotion;
+            $genre = $request->genre;
+
+            $etudiant->set("nom", $nom);
+            $etudiant->set("prenom", $prenom);
+            $etudiant->set("promotion", $promotion);
+            $etudiant->set("genre", $genre);
+
+            $etudiant->save();
 
             return response()->json([
-                'nom' => $nom,
-                'prenom' => $prenom,
-                'promotion' => $promotion,
-                'genre' => $genre,
-                'etudiant' => $etudiant
+                'message' => 'Modification réuissi!'
             ], 200);
 
             // L'objet a été récupéré avec succès.
@@ -130,6 +143,25 @@ class EtudiantController extends Controller
     }
 
     public function delete($id_etudiant){
+        $query = new ParseQuery("etudiant");
 
+        try {
+
+            $etudiant = $query->get($id_etudiant, false);
+
+            $etudiant->delete($etudiant->getObjectId());
+
+            return response()->json([
+                'message' => 'Suppression réuissi!'
+            ], 200);
+
+            // L'objet a été récupéré avec succès.
+        } catch (ParseException $ex) {
+            // The object was not retrieved successfully.
+            // error is a ParseException with an error code and message.
+            return response()->json([
+                'message' => 'Échec de la création d\'un nouvel objet, avec un message d\'erreur:' . $ex->getMessage()
+            ]);
+        }
     }
 }
