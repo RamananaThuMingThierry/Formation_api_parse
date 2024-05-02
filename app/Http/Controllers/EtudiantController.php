@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EtudiantRequest;
 use App\ParseRequest;
 use Parse\ParseQuery;
 use Parse\ParseObject;
@@ -16,11 +17,13 @@ class EtudiantController extends Controller
 
         try {
 
-            $etudiant = $query->find(false, false);
+            $etudiants = $query->find();
+            
+            return view('etudiant.index', compact('etudiants'));
 
-            return response()->json([
-                'etudiant' => $etudiant
-            ], 200);
+            // return response()->json([
+            //     'etudiant' => $etudiant
+            // ], 200);
 
             // L'objet a été récupéré avec succès.
         } catch (ParseException $ex) {
@@ -33,7 +36,7 @@ class EtudiantController extends Controller
     }
 
     // Méthode permettant d'ajout un nouveau étudiant
-    public function store(Request $request){
+    public function store(EtudiantRequest $request){
         
         $nom = $request->nom;
         $prenom = $request->prenom;
