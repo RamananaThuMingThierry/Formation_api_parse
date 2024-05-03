@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\EtudiantController;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,5 +20,5 @@ Route::get('/', function () {
 
 
 // Récupèrer la liste des étudiants
-Route::get('/etudiant',  'EtudiantController@index')->name('etudiant.index');;
+Route::get('/post',  'PostController@index')->name('etudiant.index');;
 

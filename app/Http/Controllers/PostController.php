@@ -2,27 +2,36 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\EtudiantRequest;
 use App\ParseRequest;
 use Parse\ParseQuery;
 use Parse\ParseObject;
 use Parse\ParseException;
 use Illuminate\Http\Request;
 
-class EtudiantController extends Controller
+class PostController extends Controller
 {
-    // Méthode permettant de récupérer la des étudiants
-    public function index(){
-        $query = new ParseQuery("etudiant");
+     // Méthode permettant de récupérer la des étudiants
+     public function index(){
+        $query = new ParseQuery("Post");
 
         try {
 
-            $etudiants = $query->find();
-            return view('etudiant.index', compact('etudiants'));
+            // Utiliser API
+            //$etudiants = $query->find(false, false);
+            $posts = $query->find();            
+            //return view('etudiant.index', compact('posts'));
+             // Parcourir les publications
+            foreach ($posts as $post) {
+            //     // Récupérer les commentaires associés à cette publication
+                $commentsQuery = new ParseQuery("Comment");
+                $commentsQuery->equalTo("parent", $post->getObjectId());
+                $comments = $commentsQuery->find();
+            //     // Stocker les commentaires dans un tableau associatif avec l'ID de la publication comme clé
+                $commentsByPostId[$post->getObjectId()] = $comments;
+            }
 
-            // return response()->json([
-            //     'etudiant' => $etudiant
-            // ], 200);
+            return view('etudiant.index', compact('posts', 'commentsByPostId'));
+            
 
             // L'objet a été récupéré avec succès.
         } catch (ParseException $ex) {
@@ -35,27 +44,22 @@ class EtudiantController extends Controller
     }
 
     // Méthode permettant d'ajout un nouveau étudiant
-    public function store(EtudiantRequest $request){
+    public function store(Request $request){
         
-        $nom = $request->nom;
-        $prenom = $request->prenom;
-        $promotion = $request->promotion;
-        $genre = $request->genre;
+        $title = $request->title;
+        $content = $request->content;
 
         if(ParseRequest::checkHealth()){
 
-            $etudiant = new ParseObject("etudiant");
-            $etudiant->set("nom", $nom);
-            $etudiant->set("prenom", $prenom);
-            $etudiant->set("promotion", $promotion);
-            $etudiant->set("genre", $genre);
-            $etudiant->add("skills", ["T", "J", "k"]);
+            $post = new ParseObject("Post");
+            $post->set("title", $title);
+            $post->set("content", $content);
           
             try {
-                $etudiant->save();
 
+                $post->save();
                 return response()->json([
-                    'message' => 'Enregistrement réussi avec Id : ' .$etudiant->getObjectId()
+                    'message' => 'Enregistrement réussi avec Id : ' .$post->getObjectId()
                 ]);
 
             } catch (ParseException $ex) {  
