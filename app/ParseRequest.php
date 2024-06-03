@@ -21,7 +21,6 @@ class ParseRequest extends Model
         ParseClient::setServerURL($parse_url, "/");
         ParseClient::setHttpClient(new ParseCurlHttpClient());
         $health = ParseClient::getServerHealth();
-        // dd($health);
         if ($health['status'] === 200) {
             return true;
         } else {

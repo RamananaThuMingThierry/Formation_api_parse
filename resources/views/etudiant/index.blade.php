@@ -6,24 +6,16 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th scope="col">Title</th>
-              <th scope="col">Content</th>
-              <th scope="col">Messages</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Prénom</th>
               <th scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
-            @foreach ($posts as $post)
+            @foreach ($etudiants as $etudiant)
             <tr>
-              <td>{{ $post->title }}</td>
-              <td>{{ $post->content  }}</td>
-              @if(isset($commentsByPostId[$post->getObjectId()]))
-                  <ul>
-                      @foreach ($commentsByPostId[$post->getObjectId()] as $comment)
-                          <li>Comment ID: {{ $comment->getObjectId() }} - Content: {{ $comment->get("content") }}</li>
-                      @endforeach
-                  </ul>
-              @endif
+              <td>{{ $etudiant->nom  }}</td>
+              <td>{{ $etudiant->prenom  }}</td>
               <td></td>
             </tr>
             @endforeach
