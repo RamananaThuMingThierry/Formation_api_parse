@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Manager\EtudiantManager;
+use App\Manager\EtudiantManagerInterface;
 use App\ParseRequest;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\ServiceProvider;
@@ -15,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(
+            'App\Manager\EtudiantManagerInterface',
+            'App\Manager\EtudiantManager'
+        );
     }
 
     /**

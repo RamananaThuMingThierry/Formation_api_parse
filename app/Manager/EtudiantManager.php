@@ -24,11 +24,12 @@ class EtudiantManager implements EtudiantManagerInterface{
         }
 
         try {
+            
             $etudiants = $query->find($useMasterKey);
+
         } catch (ParseException $e) {
             Request()->session()->flash('error_message', $e->getMessage());
         }
-
         return $etudiants;
     }
   }

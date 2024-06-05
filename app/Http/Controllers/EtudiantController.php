@@ -2,44 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\EtudiantRequest;
+use App\Etudiant;
 use App\ParseRequest;
 use Parse\ParseQuery;
 use Parse\ParseObject;
 use Parse\ParseException;
+use Facade\FlareClient\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use App\Http\Requests\EtudiantRequest;
+use App\Manager\EtudiantManagerInterface;
+use Illuminate\Support\Facades\Redirect;
 
 class EtudiantController extends Controller
 {
     // Méthode permettant de récupérer la des étudiants
-    public function index(){
-        $query = new ParseQuery("etudiant");
-
+    public function index(EtudiantManagerInterface $etudiantManagerInterface){
         try {
 
-            $etudiants = $query->find();
-            return view('etudiant.index', compact('etudiants'));
+            $etudiants = $etudiantManagerInterface->getAll();
 
-            // return response()->json([
-            //     'etudiant' => $etudiant
-            // ], 200);
+            foreach ($etudiants as $etudiant) {
+                $etudiant->set('objectId', Crypt::encryptString($etudiant->getObjectId()));
+            }
 
-            // L'objet a été récupéré avec succès.
+           return view('admin.etudiant.index', compact('etudiants'));
+
         } catch (ParseException $ex) {
-            // The object was not retrieved successfully.
-            // error is a ParseException with an error code and message.
+        
             return response()->json([
                 'message' => 'Échec de la création d\'un nouvel objet, avec un message d\'erreur:' . $ex->getMessage()
             ]);
         }
     }
 
+    public function create(){
+        $etudiant = new Etudiant();
+        
+        // Pré-remplire un champs
+        $etudiant->fill([
+            'nom' => 'RAMANANA',
+            'prenom' => 'Thierry'
+        ]);
+
+        return View('admin.etudiant.form',[
+            'etudiant' => $etudiant,
+            'autorisation' => false
+        ]);
+    }
+
     // Méthode permettant d'ajout un nouveau étudiant
     public function store(EtudiantRequest $request){
-        
+       
         $nom = $request->nom;
         $prenom = $request->prenom;
-        $promotion = $request->promotion;
         $genre = $request->genre;
 
         if(ParseRequest::checkHealth()){
@@ -47,16 +63,12 @@ class EtudiantController extends Controller
             $etudiant = new ParseObject("etudiant");
             $etudiant->set("nom", $nom);
             $etudiant->set("prenom", $prenom);
-            $etudiant->set("promotion", $promotion);
             $etudiant->set("genre", $genre);
-            $etudiant->add("skills", ["T", "J", "k"]);
-          
+            
             try {
                 $etudiant->save();
 
-                return response()->json([
-                    'message' => 'Enregistrement réussi avec Id : ' .$etudiant->getObjectId()
-                ]);
+                return Redirect(route('admin.etudiant.index'));
 
             } catch (ParseException $ex) {  
                 // Exécuter toute logique à mettre en œuvre en cas d'échec de la sauvegarde.
@@ -98,98 +110,56 @@ class EtudiantController extends Controller
     }
 
     // Méthode permettant de récupérer un étudiant
-    public function show($id_etudiant){
-        
-        $query = new ParseQuery("etudiant");
-
-        try {
-
-            $etudiant = $query->get($id_etudiant, false);
-
-            $nom = $etudiant->get("nom");
-            $prenom = $etudiant->get("prenom");
-            $promotion = $etudiant->get("promotion");
-            $genre = $etudiant->get("genre");
-            $objectId = $etudiant->getObjectId();
-            $updatedAt = $etudiant->getUpdatedAt();
-            $createdAt = $etudiant->getCreatedAt();
-            $acl = $etudiant->getACL();
-
-            return response()->json([
-                'updatedAt' => $updatedAt,
-                'createdAt' => $createdAt,
-                'acl' => $acl,
-                'id' => $objectId,
-                'nom' => $nom,
-                'prenom' => $prenom,
-                'promotion' => $promotion,
-                'genre' => $genre,
-                'etudiant' => $etudiant
-            ], 200);
-
-            // L'objet a été récupéré avec succès.
-        } catch (ParseException $ex) {
-            // The object was not retrieved successfully.
-            // error is a ParseException with an error code and message.
-            return response()->json([
-                'message' => 'Échec de la création d\'un nouvel objet, avec un message d\'erreur:' . $ex->getMessage()
-            ]);
-        }
+    public function show($id_etudiant, EtudiantManagerInterface $etudiantManagerInterface){
+       
+        $etudiant = $etudiantManagerInterface->getbyId(Crypt::decryptString($id_etudiant));
+       
+        return View('admin.etudiant.show', compact('etudiant'));
     }
 
-    // Méthode permettant de faire une mise à jours des données d'un étudiant
-    public function update(Request $request, $id_etudiant){
- 
-        $query = new ParseQuery("etudiant");
+    public function edit($id_etudiant, EtudiantManagerInterface $etudiantManagerInterface){
+        return View('admin.etudiant.form', [
+            'etudiant' =>  $etudiantManagerInterface->getbyId(Crypt::decryptString($id_etudiant)),
+            'autorisation' => true,
+            'id_etudiant' => $id_etudiant
+        ]);    
+    }
+
+    public function update(EtudiantRequest $request, $id_etudiant, EtudiantManagerInterface $etudiantManagerInterface){
         
         try {
-
-            $etudiant = $query->get($id_etudiant, false);
 
             $nom = $request->nom;
             $prenom = $request->prenom;
-            $promotion = $request->promotion;
             $genre = $request->genre;
 
-            // $etudiant->set("nom", $nom);
-            // $etudiant->set("prenom", $prenom);
-            // $etudiant->set("promotion", $promotion);
-            // $etudiant->set("genre", $genre);
-            $etudiant->increment("score");
-            $etudiant->addUnique("skills", ["B", "T", "K"]);
+            $etudiant= $etudiantManagerInterface->getbyId(Crypt::decryptString($id_etudiant));
+            
+            $etudiant->set("nom", $nom);
+            $etudiant->set("prenom", $prenom);
+            $etudiant->set("genre", $genre);
+
             $etudiant->save();
 
-            return response()->json([
-                'message' => 'Modification réuissi!'
-            ], 200);
-
-            // L'objet a été récupéré avec succès.
+            return Redirect(route('admin.etudiant.index')); 
         } catch (ParseException $ex) {
-            // The object was not retrieved successfully.
-            // error is a ParseException with an error code and message.
             return response()->json([
                 'message' => 'Échec de la création d\'un nouvel objet, avec un message d\'erreur:' . $ex->getMessage()
             ]);
         }
     }
 
-    public function delete($id_etudiant){
-        $query = new ParseQuery("etudiant");
+    public function delete($id_etudiant, EtudiantManagerInterface $etudiantManagerInterface){
 
         try {
 
-            $etudiant = $query->get($id_etudiant, false);
+            $etudiant= $etudiantManagerInterface->getbyId(Crypt::decryptString($id_etudiant));
 
             $etudiant->destroy();
 
-            return response()->json([
-                'message' => 'Suppression réuissi!'
-            ], 200);
+            return Redirect(route('admin.etudiant.index')); 
 
-            // L'objet a été récupéré avec succès.
         } catch (ParseException $ex) {
-            // The object was not retrieved successfully.
-            // error is a ParseException with an error code and message.
             return response()->json([
                 'message' => 'Échec de la création d\'un nouvel objet, avec un message d\'erreur:' . $ex->getMessage()
             ]);
