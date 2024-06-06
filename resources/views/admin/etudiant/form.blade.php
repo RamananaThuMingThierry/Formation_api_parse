@@ -9,11 +9,14 @@
       <h1 class="text-center">@yield('titre')</h1>
     </div>
     <div class="card-body">
-      <form action="{{ route($autorisation ? 'admin.etudiant.update' : 'admin.etudiant.store', $id_etudiant ?? 0)  }}" method="post" class="vstack gap-2">
+      <form action="{{ route($autorisation ? 'admin.etudiant.update' : 'admin.etudiant.store', $id_etudiant ?? 0)  }}" enctype="multipart/form-data" method="post" class="vstack gap-2">
         @csrf
         @method($autorisation ? 'PUT' : 'POST')
-        
-         @include('widget.input', ['class' => 'col', 'label' => 'Nom', 'name' => 'nom', 'valeur' => $etudiant->nom])
+        <div class="form-group">
+          <label for="image">image</label>
+          <input type="file" class="form-control" id="image" name="image" accept="image/*"/>
+        </div>
+        @include('widget.input', ['class' => 'col', 'label' => 'Nom', 'name' => 'nom', 'valeur' => $etudiant->nom])
         @include('widget.input', ['class' => 'col', 'label' => 'Prénom', 'name' => 'prenom', 'valeur' => $etudiant->prenom])
 
        <div class="row">

@@ -9,6 +9,7 @@ class Etudiant extends Model
     public $table = "etudiant";
 
     public $fillable = [
+        'image',
         'nom',
         'prenom',
         'genre'

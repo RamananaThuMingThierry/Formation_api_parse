@@ -24,9 +24,10 @@ class EtudiantRequest extends FormRequest
     public function rules()
     {
         return [
-            'nom' => 'required|string|max:255',
-            'prenom' => 'nullable|string',
-            'genre' => 'required|string'
+            'nom' => ['required', 'string','max:255'],
+            'prenom' => ['nullable', 'string'],
+            'genre' => ['required', 'string'],
+            'image' => ['image', 'nullable']
         ];
     }
 }

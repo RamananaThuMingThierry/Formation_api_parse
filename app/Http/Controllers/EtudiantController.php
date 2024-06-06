@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Etudiant;
+use Parse\ParseFile;
 use App\ParseRequest;
 use Parse\ParseQuery;
 use Parse\ParseObject;
@@ -11,8 +12,8 @@ use Facade\FlareClient\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\EtudiantRequest;
-use App\Manager\EtudiantManagerInterface;
 use Illuminate\Support\Facades\Redirect;
+use App\Manager\EtudiantManagerInterface;
 
 class EtudiantController extends Controller
 {
@@ -60,7 +61,17 @@ class EtudiantController extends Controller
 
         if(ParseRequest::checkHealth()){
 
+            // if($image){
+            //     $filePath = $image->getPathName();
+            //     $fileName = $image->getClientOriginalName();
+            //     $parseImage = ParseFile::createFromFile($filePath, $fileName);
+            //     $parseImage->save();
+            // }else{
+            //     $parseImage = null;
+            // }
+           
             $etudiant = new ParseObject("etudiant");
+            // $etudiant->set('image', $parseImage);
             $etudiant->set("nom", $nom);
             $etudiant->set("prenom", $prenom);
             $etudiant->set("genre", $genre);
