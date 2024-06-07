@@ -58,6 +58,7 @@ class EtudiantController extends Controller
         $nom = $request->nom;
         $prenom = $request->prenom;
         $genre = $request->genre;
+        // $image = $request->file('image');
 
         if(ParseRequest::checkHealth()){
 
