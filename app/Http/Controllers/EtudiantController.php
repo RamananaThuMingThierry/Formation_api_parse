@@ -58,18 +58,18 @@ class EtudiantController extends Controller
         $nom = $request->nom;
         $prenom = $request->prenom;
         $genre = $request->genre;
-        // $image = $request->file('image');
 
         if(ParseRequest::checkHealth()){
 
-            // if($image){
-            //     $filePath = $image->getPathName();
-            //     $fileName = $image->getClientOriginalName();
-            //     $parseImage = ParseFile::createFromFile($filePath, $fileName);
-            //     $parseImage->save();
-            // }else{
-            //     $parseImage = null;
-            // }
+            if($request->hasFile('image')){
+                $image = $request->file('image');
+                $filePath = $image->getPathName();
+                $fileName = $image->getClientOriginalName();
+                $parseImage = ParseFile::createFromFile($filePath, $fileName);
+                $parseImage->save();
+            }else{
+                $parseImage = null;
+            }
            
             $etudiant = new ParseObject("etudiant");
             // $etudiant->set('image', $parseImage);
